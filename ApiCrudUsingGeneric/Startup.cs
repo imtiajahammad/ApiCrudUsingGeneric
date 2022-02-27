@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,6 +30,14 @@ namespace ApiCrudUsingGeneric
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            /*var connection = Configuration.GetConnectionString("DatabaseConnection");
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
+            services.Configure<AppSettings>(Configuration.GetSection("ApplicationSettings"));
+            services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));*/
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DatabaseConnection")));
+
+
             services.AddScoped<IGenericService<Student>, StudentService>();
             services.AddScoped<IGenericService<Teacher>, TeacherService>();
         }

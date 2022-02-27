@@ -9,41 +9,36 @@ namespace ApiCrudUsingGeneric.Service
 {
     public class TeacherService : IGenericService<Teacher>
     {
-        List<Teacher> _teachers = new List<Teacher>();
-        public TeacherService()
+        private readonly ApplicationDbContext _dbContext;
+        public TeacherService(ApplicationDbContext dbContext)
         {
-            for (int i = 1; i <= 9; i++)
-            {
-                _teachers.Add(
-                    new Teacher
-                    {
-                        TeacherId = i,
-                        Name = "Tch" + i + 1,
-                        Subject = "Sub" + i
-                    }
-                    );
-            }
+            this._dbContext = dbContext;
         }
         public List<Teacher> Delete(int id)
         {
-            _teachers.RemoveAll(x => x.TeacherId == id);
-            return _teachers;
+            Teacher std = _dbContext.Teachers.FirstOrDefault(x => x.TeacherId == id);
+            _dbContext.Teachers.Remove(std);
+            _dbContext.SaveChanges();
+            return _dbContext.Teachers.ToList();
         }
 
         public List<Teacher> GetAll()
         {
-            return _teachers;
+            return _dbContext.Teachers.ToList();
         }
 
-        public Teacher GetById(int Id)
+        public Teacher GetById(int id)
         {
-            return _teachers.Where(x => x.TeacherId == Id).SingleOrDefault();
+            Teacher std = _dbContext.Teachers.FirstOrDefault(x => x.TeacherId == id);
+            return std;
         }
 
         public List<Teacher> Insert(Teacher item)
         {
-            _teachers.Add(item);
-            return _teachers;
+
+            _dbContext.Teachers.Add(item);
+            _dbContext.SaveChanges();
+            return _dbContext.Teachers.ToList();
         }
     }
 }
