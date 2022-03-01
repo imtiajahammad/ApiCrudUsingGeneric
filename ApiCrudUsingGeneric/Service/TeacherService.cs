@@ -1,5 +1,6 @@
 ﻿using ApiCrudUsingGeneric.IService;
 using ApiCrudUsingGeneric.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,29 @@ namespace ApiCrudUsingGeneric.Service
             _dbContext.Teachers.Add(item);
             _dbContext.SaveChanges();
             return _dbContext.Teachers.ToList();
+        }
+        public List<Teacher> Update(Teacher item)
+        {
+            /*Teacher std = _dbContext.Teachers.FirstOrDefault(x => x.TeacherId == item.TeacherId);
+            if (std is null)
+            {
+                return _dbContext.Teachers.ToList();
+            }
+            _dbContext.Entry(item).State = EntityState.Modified;
+            _dbContext.SaveChanges();
+            return _dbContext.Teachers.ToList();*/
+            Teacher std = _dbContext.Teachers.FirstOrDefault(x => x.TeacherId == item.TeacherId);
+            if (std is null)
+            {
+                return _dbContext.Teachers.ToList();
+            }
+            std.Name = item.Name;
+            std.Subject = item.Subject;
+            std.Message = item.Message;
+            _dbContext.Entry(std).State = EntityState.Modified;
+            _dbContext.SaveChanges();
+            return _dbContext.Teachers.ToList(); 
+
         }
     }
 }

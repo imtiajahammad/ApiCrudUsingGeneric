@@ -47,5 +47,12 @@ namespace ApiCrudUsingGeneric.Controllers
         {
             return _genericService.Delete(id);
         }
+
+        // PUT api/<GenericController>
+        [HttpPut]
+        public List<T> Update([FromBody] T value)
+        {
+            return _genericService.Update(value);
+        }
     }
 }

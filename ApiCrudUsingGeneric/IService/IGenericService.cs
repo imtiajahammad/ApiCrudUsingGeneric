@@ -14,5 +14,7 @@ namespace ApiCrudUsingGeneric.IService
         List<T> Insert(T item);
 
         List<T> Delete(int id);
+
+        List<T> Update(T item);
     }
 }

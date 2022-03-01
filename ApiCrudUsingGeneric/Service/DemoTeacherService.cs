@@ -45,5 +45,18 @@ namespace ApiCrudUsingGeneric.Service
             _teachers.Add(item);
             return _teachers;
         }
+        public List<Teacher> Update(Teacher item)
+        {
+            foreach (Teacher std in _teachers)
+            {
+                if (std.TeacherId == item.TeacherId)
+                {
+                    std.Name = item.Name;
+                    std.Subject = item.Subject;
+                    std.Message = item.Message;
+                }
+            }
+            return _teachers;
+        }
     }
 }
