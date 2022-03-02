@@ -40,6 +40,11 @@ namespace ApiCrudUsingGeneric
 
             services.AddScoped<IGenericService<Student>, StudentService>();
             services.AddScoped<IGenericService<Teacher>, TeacherService>();
+
+            services.AddTransient<IMoviesQueries, MoviesQueries>();
+            services.AddTransient<IUnitOfWorkEntityFramework, UnitOfWorkEntityFramework>();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
