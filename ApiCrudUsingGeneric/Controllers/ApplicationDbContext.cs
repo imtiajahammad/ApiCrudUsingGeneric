@@ -12,5 +12,6 @@ public class ApplicationDbContext : DbContext
 	public DbSet<Teacher> Teachers { get; set; }
 	public DbSet<Movie> Movies { get; set; }
 	public DbSet<Notification> Notifications { get; set; }
+	public DbSet<Employee> Employees { get; set; }
 
 }

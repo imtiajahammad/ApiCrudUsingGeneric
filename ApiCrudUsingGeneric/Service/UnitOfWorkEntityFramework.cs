@@ -1,4 +1,5 @@
 ﻿using ApiCrudUsingGeneric.IService;
+using ApiCrudUsingGeneric.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,13 @@ namespace ApiCrudUsingGeneric.Service
         //public IAssignedRolesCommand AssignedRolesCommand { get; }
         //public IUserTokensCommand UserTokensCommand { get; }
         public IMoviesCommand MoviesCommand { get; }
+        public IGenericCommand<Employee> EmployeesCommand { get; }
+
         public UnitOfWorkEntityFramework(ApplicationDbContext context)
         {
             _dbContext = context;
             MoviesCommand = new MoviesCommand(_dbContext);
+            EmployeesCommand = new EmployeesCommand(_dbContext);
         }
 
         public bool Commit()

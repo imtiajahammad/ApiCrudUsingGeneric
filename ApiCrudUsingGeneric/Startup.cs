@@ -48,6 +48,8 @@ namespace ApiCrudUsingGeneric
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
+            services.AddTransient<IGenericQueries<Employee>, GenericQueries<Employee>>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
