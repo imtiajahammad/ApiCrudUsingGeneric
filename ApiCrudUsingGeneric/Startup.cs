@@ -30,6 +30,12 @@ namespace ApiCrudUsingGeneric
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            #region swagger
+            services.AddSwaggerGen();
+            #endregion
+
+
             /*var connection = Configuration.GetConnectionString("DatabaseConnection");
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
             services.Configure<AppSettings>(Configuration.GetSection("ApplicationSettings"));
@@ -60,6 +66,12 @@ namespace ApiCrudUsingGeneric
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.RoutePrefix = string.Empty;
+            });
             app.UseHttpsRedirection();
 
             app.UseRouting();
