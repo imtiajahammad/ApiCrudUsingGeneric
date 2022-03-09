@@ -27,6 +27,16 @@ namespace ApiCrudUsingGeneric.Controllers
         [HttpPost]
         public IActionResult Post(Employee obj)
         {
+            if (obj == null)
+            {
+                //return NotFound();
+                return Ok(new StatusResult<Employee>
+                {
+                    Result=obj,
+                    Status = ResponseStatus.BADREQUEST,
+                    Message = "Parameter is null"
+                });
+            }
             Employee emp = new Employee()
             {
                 Name = obj.Name,
@@ -39,11 +49,23 @@ namespace ApiCrudUsingGeneric.Controllers
 
             if (result)
             {
-                return StatusCode(StatusCodes.Status200OK, "added");
+                /*return StatusCode(StatusCodes.Status200OK .Status200OK, "added");*/
+                return Ok(new StatusResult<Employee>
+                {
+                    Status = ResponseStatus.CREATED,
+                    Result=emp,
+                    Message = "added"
+                });
             }
             else
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");
+                /*return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");*/
+                return Ok(new StatusResult<Employee>
+                {
+                    Result=obj,
+                    Status = ResponseStatus.INTERNALSERVERERROR,
+                    Message = "Something Went Wrong"
+                });
             }
 
         }
@@ -53,16 +75,31 @@ namespace ApiCrudUsingGeneric.Controllers
         {
             if (id == null)
             {
-                return StatusCode(StatusCodes.Status404NotFound, "Not Found");
+                //return StatusCode(StatusCodes.Status404NotFound, "Not Found");
+                return Ok(new StatusResult<Employee>
+                {
+                    Status = ResponseStatus.BADREQUEST,
+                    Message = "Parameter Is null"
+                });
 
             }
             var movieTb = _employeeQueries.GetItembyId(id);
             if (movieTb == null)
             {
-                return NotFound();
+                //return NotFound();
+                return Ok(new StatusResult<Employee>
+                {
+                    Status = ResponseStatus.NOTFOUND,
+                    Message = "No Employee found with specified Id"
+                });
             }
-
-            return Ok(movieTb);
+            //return Ok(movieTb);
+            return Ok(new StatusResult<Employee>
+            {
+                Result= movieTb,
+                Status = ResponseStatus.FETCHSUCCESS,
+                Message = "Empoyee fetched with specified Id"
+            });
         }
 
         [HttpDelete]
@@ -71,13 +108,23 @@ namespace ApiCrudUsingGeneric.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                //return NotFound();
+                return Ok(new StatusResult<string>
+                {
+                    Status = ResponseStatus.BADREQUEST,
+                    Message = "Parameter Is null"
+                });
             }
 
             var emp = _employeeQueries.GetItembyId(id);
             if (emp == null)
             {
-                return NotFound();
+                //return NotFound();
+                return Ok(new StatusResult<string>
+                {
+                    Status = ResponseStatus.NOTFOUND,
+                    Message = "No Employee found with specified Id"
+                });
             }
 
             _unitOfWorkEntityFramework.EmployeesCommand.Delete(emp);
@@ -85,19 +132,48 @@ namespace ApiCrudUsingGeneric.Controllers
 
             if (result)
             {
-                return StatusCode(StatusCodes.Status200OK, "Employee Deleted Successfully !");
+                //return StatusCode(StatusCodes.Status200OK, "Employee Deleted Successfully !");
+                return Ok(new StatusResult<Employee>
+                {
+                    Status = ResponseStatus.DELETED,
+                    Result = emp,
+                    Message = "Deleted"
+                });
             }
             else
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");
+                //return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");
+                return Ok(new StatusResult<string>
+                {
+                    Status = ResponseStatus.INTERNALSERVERERROR,
+                    Message = "Something Went Wrong"
+                });
             }
         }
 
         [HttpPut]
         public IActionResult Update(Employee emp)
-        { 
+        {
+            if (emp == null)
+            {
+                //return NotFound();
+                return Ok(new StatusResult<Employee>
+                {
+                    Status = ResponseStatus.BADREQUEST,
+                    Message = "Parameter Is null"
+                });
+            }
             var employee = _employeeQueries.GetItembyId(emp.Id);
-
+            if (employee == null)
+            {
+                //return NotFound();
+                return Ok(new StatusResult<Employee>
+                {
+                    Result=emp,
+                    Status = ResponseStatus.NOTFOUND,
+                    Message = "Employee is not found with specified id"
+                });
+            }
             employee.Name = emp.Name;
             employee.Designation = emp.Designation;
             employee.Age = emp.Age;
@@ -106,11 +182,23 @@ namespace ApiCrudUsingGeneric.Controllers
 
             if (result)
             {
-                return StatusCode(StatusCodes.Status200OK, "Employee Updated Successfully !");
+                //return StatusCode(StatusCodes.Status200OK, "Employee Updated Successfully !");
+                return Ok(new StatusResult<Employee>
+                {
+                    Status = ResponseStatus.UPDATED,
+                    Result = emp,
+                    Message = "Employee Updated Successfully !"
+                });
             }
             else
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");
+                //return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");
+                return Ok(new StatusResult<Employee>
+                {
+                    Result=emp,
+                    Status = ResponseStatus.INTERNALSERVERERROR,
+                    Message = "Something Went Wrong"
+                });
             }
 
         }
@@ -122,10 +210,21 @@ namespace ApiCrudUsingGeneric.Controllers
             IQueryable<Employee> movieTb = _employeeQueries.GetItems();
             if (movieTb == null)
             {
-                return NotFound();
+                //return NotFound();
+                return Ok(new StatusResult<Employee>
+                {
+                    Status = ResponseStatus.BADREQUEST,
+                    Message = "No Empoyees found"
+                });
             }
 
-            return Ok(movieTb);
+            //return Ok(movieTb);
+            return Ok(new StatusResult<IQueryable<Employee>>
+            {
+                Result = movieTb,
+                Status = ResponseStatus.FETCHSUCCESS,
+                Message = "Empoyee fetched with specified Id"
+            });
         }
 
         /*[HttpGet]
