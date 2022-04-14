@@ -55,8 +55,11 @@ namespace ApiCrudUsingGeneric.Models
         , SERVICEUNAVAILABLE= 13/*The server is not ready to handle the request.*/
         , GATEWAYTIMEOUT= 14/*The server is acting as a gateway and cannot get a response in time for a request.*/
         , OKAY=15 /*It indicates that the REST API successfully carried out whatever action the client requested*/
-        , DELETED
-        , UPDATED
+        , DELETED=16
+        , UPDATED=17
+        , EXCEPTION=18
+        ,COMMITERROR=19
+        ,NULLPARAMETER=20
 
     }
 }

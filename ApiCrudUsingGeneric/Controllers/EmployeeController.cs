@@ -2,6 +2,7 @@
 using ApiCrudUsingGeneric.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,88 +16,117 @@ namespace ApiCrudUsingGeneric.Controllers
     {
         private readonly IUnitOfWorkEntityFramework _unitOfWorkEntityFramework;
         private readonly IGenericQueries<Employee> _employeeQueries;
+        private LinkGenerator _linkGenerator;
+
         public EmployeeController(
             IUnitOfWorkEntityFramework unitOfWorkEntityFramework
             , IGenericQueries<Employee> genericQueries
+            , LinkGenerator linkGenerator
             )
         {
             this._unitOfWorkEntityFramework = unitOfWorkEntityFramework;
             this._employeeQueries = genericQueries;
+            _linkGenerator = linkGenerator;
         }
 
         [HttpPost]
         public IActionResult Post(Employee obj)
         {
-            if (obj == null)
+            #region objectIsNull-start
+            /*if (obj == null)
             {
-                //return NotFound();
-                return Ok(new StatusResult<Employee>
+                var ownersWrapper0 = new LinkCollectionWrapper(obj);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
-                    Result=obj,
-                    Status = ResponseStatus.BADREQUEST,
+                    Result = CreateLinksForOwners(ownersWrapper0),
+                    Status = ResponseStatus.NULLPARAMETER,
                     Message = "Parameter is null"
                 });
-            }
+            }*/
+            #endregion objectIsNull-end
             Employee emp = new Employee()
-            {
-                Name = obj.Name,
-                Designation =obj.Designation,
-                Age =obj.Age
-            };
-
-            _unitOfWorkEntityFramework.EmployeesCommand.Add(emp);
-            var result = _unitOfWorkEntityFramework.Commit();
-
-            if (result)
-            {
-                /*return StatusCode(StatusCodes.Status200OK .Status200OK, "added");*/
-                return Ok(new StatusResult<Employee>
                 {
-                    Status = ResponseStatus.CREATED,
-                    Result=emp,
-                    Message = "added"
-                });
-            }
-            else
-            {
-                /*return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");*/
-                return Ok(new StatusResult<Employee>
-                {
-                    Result=obj,
-                    Status = ResponseStatus.INTERNALSERVERERROR,
-                    Message = "Something Went Wrong"
-                });
-            }
+                    Name = obj.Name,
+                    Designation = obj.Designation,
+                    Age = obj.Age
+                };
+             _unitOfWorkEntityFramework.EmployeesCommand.Add(emp);
+             /*object qq = default;
+             int i2 = (int)qq;*/
+             var result = _unitOfWorkEntityFramework.Commit();
+             #region resultIsSuccess-start
+             if (result)
+             {
+                 var ownerLinks = CreateLinksForModel(emp.Id, null);
+                 emp.Links = ownerLinks;
+                 var ownersWrapper = new LinkCollectionWrapper(emp);
+                 return Ok(new StatusResult<LinkCollectionWrapper>
+                 {
+                     Result = CreateLinksForController(ownersWrapper),
+                     Status = ResponseStatus.FETCHSUCCESS,
+                     Message = "Empoyee Created with specified Id"
+                 });
+             }
+             #endregion resultIsSuccess-end
 
+             #region resultIsFalse-end
+             else
+             {
+                 var ownersWrapper2 = new LinkCollectionWrapper(obj);
+                 return Ok(new StatusResult<LinkCollectionWrapper>
+                 {
+                     Result = CreateLinksForController(ownersWrapper2),
+                     Status = ResponseStatus.COMMITERROR,
+                     Message = "Empoyee Creation Failed"
+                 });
+             }
+            #endregion resultIsFalse-end
+            #region defaultReturn
+            /*return BadRequest(new StatusResult<LinkCollectionWrapper>
+                {
+                    Result = CreateLinksForOwners(new LinkCollectionWrapper(obj)),
+                    Status = ResponseStatus.FAILED,
+                    Message = "Empoyee Creation Failed"
+                });*/
+            #endregion defaultReturn
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int? id)
+        public IActionResult Get(int id)
         {
-            if (id == null)
+            #region parameterNull
+            /*if (id == null)
             {
-                //return StatusCode(StatusCodes.Status404NotFound, "Not Found");
-                return Ok(new StatusResult<Employee>
+                var ownersWrapper0 = new LinkCollectionWrapper(id);
+                return BadRequest(new StatusResult<LinkCollectionWrapper>
                 {
-                    Status = ResponseStatus.BADREQUEST,
-                    Message = "Parameter Is null"
+                    Result = CreateLinksForController(ownersWrapper0),
+                    Status = ResponseStatus.NULLPARAMETER,
+                    Message = "Parameter is null"
                 });
 
-            }
+            }*/
+            #endregion parameterNull
             var movieTb = _employeeQueries.GetItembyId(id);
+            #region noContent
             if (movieTb == null)
             {
-                //return NotFound();
-                return Ok(new StatusResult<Employee>
+
+                var ownersWrapper0 = new LinkCollectionWrapper(movieTb);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
+                    Result = CreateLinksForController(ownersWrapper0),
                     Status = ResponseStatus.NOTFOUND,
                     Message = "No Employee found with specified Id"
                 });
             }
-            //return Ok(movieTb);
-            return Ok(new StatusResult<Employee>
+            #endregion noContent
+            var ownerLinks = CreateLinksForModel(movieTb.Id, null);
+            movieTb.Links = ownerLinks;
+            var ownersWrapper = new LinkCollectionWrapper(movieTb);
+            return Ok(new StatusResult<LinkCollectionWrapper>
             {
-                Result= movieTb,
+                Result = CreateLinksForController(ownersWrapper),
                 Status = ResponseStatus.FETCHSUCCESS,
                 Message = "Empoyee fetched with specified Id"
             });
@@ -104,24 +134,26 @@ namespace ApiCrudUsingGeneric.Controllers
 
         [HttpDelete]
         [HttpDelete("{id}")]
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(int id)
         {
-            if (id == null)
+            /*if (id == null)
             {
-                //return NotFound();
-                return Ok(new StatusResult<string>
+                var ownersWrapper0 = new LinkCollectionWrapper(id);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
+                    Result = CreateLinksForController(ownersWrapper0),
                     Status = ResponseStatus.BADREQUEST,
-                    Message = "Parameter Is null"
+                    Message = "Parameter is null"
                 });
-            }
+            }*/
 
             var emp = _employeeQueries.GetItembyId(id);
             if (emp == null)
             {
-                //return NotFound();
-                return Ok(new StatusResult<string>
+                var ownersWrapper0 = new LinkCollectionWrapper(id);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
+                    Result = CreateLinksForController(ownersWrapper0),
                     Status = ResponseStatus.NOTFOUND,
                     Message = "No Employee found with specified Id"
                 });
@@ -132,21 +164,22 @@ namespace ApiCrudUsingGeneric.Controllers
 
             if (result)
             {
-                //return StatusCode(StatusCodes.Status200OK, "Employee Deleted Successfully !");
-                return Ok(new StatusResult<Employee>
+                var ownersWrapper = new LinkCollectionWrapper(id);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
+                    Result = CreateLinksForController(ownersWrapper),
                     Status = ResponseStatus.DELETED,
-                    Result = emp,
-                    Message = "Deleted"
+                    Message = "Empoyee Deleted with specified Id"
                 });
             }
             else
             {
-                //return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");
-                return Ok(new StatusResult<string>
+                var ownersWrapper2 = new LinkCollectionWrapper(id);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
-                    Status = ResponseStatus.INTERNALSERVERERROR,
-                    Message = "Something Went Wrong"
+                    Result = CreateLinksForController(ownersWrapper2),
+                    Status = ResponseStatus.COMMITERROR,
+                    Message = "Empoyee Delete Failed"
                 });
             }
         }
@@ -156,22 +189,23 @@ namespace ApiCrudUsingGeneric.Controllers
         {
             if (emp == null)
             {
-                //return NotFound();
-                return Ok(new StatusResult<Employee>
+                var ownersWrapper0 = new LinkCollectionWrapper(emp);
+                return BadRequest(new StatusResult<LinkCollectionWrapper>
                 {
-                    Status = ResponseStatus.BADREQUEST,
-                    Message = "Parameter Is null"
+                    Result = CreateLinksForController(ownersWrapper0),
+                    Status = ResponseStatus.NULLPARAMETER,
+                    Message = "Parameter is null"
                 });
             }
             var employee = _employeeQueries.GetItembyId(emp.Id);
             if (employee == null)
             {
-                //return NotFound();
-                return Ok(new StatusResult<Employee>
+                var ownersWrapper0 = new LinkCollectionWrapper(emp);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
-                    Result=emp,
+                    Result = CreateLinksForController(ownersWrapper0),
                     Status = ResponseStatus.NOTFOUND,
-                    Message = "Employee is not found with specified id"
+                    Message = "No Employee found with specified Id"
                 });
             }
             employee.Name = emp.Name;
@@ -179,28 +213,29 @@ namespace ApiCrudUsingGeneric.Controllers
             employee.Age = emp.Age;
             _unitOfWorkEntityFramework.EmployeesCommand.Update(employee);
             var result = _unitOfWorkEntityFramework.Commit();
-
+            result = false;
             if (result)
             {
-                //return StatusCode(StatusCodes.Status200OK, "Employee Updated Successfully !");
-                return Ok(new StatusResult<Employee>
+                var ownerLinks = CreateLinksForModel(employee.Id, null);
+                employee.Links = ownerLinks;
+                var ownersWrapper0 = new LinkCollectionWrapper(employee);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
+                    Result = CreateLinksForController(ownersWrapper0),
                     Status = ResponseStatus.UPDATED,
-                    Result = emp,
-                    Message = "Employee Updated Successfully !"
+                    Message = "Employee updated with specified Id"
                 });
             }
             else
             {
-                //return StatusCode(StatusCodes.Status500InternalServerError, "Something Went Wrong");
-                return Ok(new StatusResult<Employee>
+                var ownersWrapper0 = new LinkCollectionWrapper(emp);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
-                    Result=emp,
-                    Status = ResponseStatus.INTERNALSERVERERROR,
-                    Message = "Something Went Wrong"
+                    Result = CreateLinksForController(ownersWrapper0),
+                    Status = ResponseStatus.COMMITERROR,
+                    Message = "Employee update failed with specified Id"
                 });
             }
-
         }
 
 
@@ -210,20 +245,27 @@ namespace ApiCrudUsingGeneric.Controllers
             IQueryable<Employee> movieTb = _employeeQueries.GetItems();
             if (movieTb == null)
             {
-                //return NotFound();
-                return Ok(new StatusResult<Employee>
+                var ownersWrapper0 = new LinkCollectionWrapper(movieTb);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
-                    Status = ResponseStatus.BADREQUEST,
-                    Message = "No Empoyees found"
+                    Result = CreateLinksForController(ownersWrapper0),
+                    Status = ResponseStatus.NOTFOUND,
+                    Message = "No Employee found"
                 });
             }
 
-            //return Ok(movieTb);
-            return Ok(new StatusResult<IQueryable<Employee>>
+
+            foreach (Employee aa in movieTb)
             {
-                Result = movieTb,
+                var singleModelLinks = CreateLinksForModel(aa.Id, null);
+                aa.Links = singleModelLinks;
+            }
+            var ownersWrapper = new LinkCollectionWrapper(movieTb);
+            return Ok(new StatusResult<LinkCollectionWrapper>
+            {
+                Result = CreateLinksForController(ownersWrapper),
                 Status = ResponseStatus.FETCHSUCCESS,
-                Message = "Empoyee fetched with specified Id"
+                Message = "Empoyees fetched"
             });
         }
 
@@ -271,5 +313,33 @@ namespace ApiCrudUsingGeneric.Controllers
             // Returing List of Customers Collections  
             return items;
         }*/
+
+
+        private IEnumerable<Link> CreateLinksForModel(int id, string fields = "")
+        {
+            var links = new List<Link>
+            {
+                new Link(_linkGenerator.GetUriByAction(HttpContext, nameof(Get), values: new { id, fields }),
+                "GetEmployeeById",
+                "GET"),
+                new Link(_linkGenerator.GetUriByAction(HttpContext, nameof(Update), values: new { id,fields }),
+                "UpdateEmployee",
+                "PUT"),
+                new Link(_linkGenerator.GetUriByAction(HttpContext, nameof(Delete), values: new { id,fields }),
+                "DeleteEmployeeById",
+                "DELETE")
+            };
+            return links;
+        }
+        private LinkCollectionWrapper CreateLinksForController(LinkCollectionWrapper CollectionWrapper)
+        {
+            /*CollectionWrapper.Links.Add(new Link(_linkGenerator.GetUriByAction(HttpContext, nameof(Get)),
+                    "GetEmployees",
+                    "GET"));*/
+            CollectionWrapper.Links.Add(new Link("https://localhost:44391/api/Employee",
+                    "GetEmployees",
+                    "GET"));
+            return CollectionWrapper;
+        }
     }
 }
