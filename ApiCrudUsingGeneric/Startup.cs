@@ -31,8 +31,38 @@ namespace ApiCrudUsingGeneric
         {
             services.AddControllers();
 
+            /*api versioning-start*/
+            services.AddApiVersioning(x => {
+                x.DefaultApiVersion = new ApiVersion(1, 0);
+                x.AssumeDefaultVersionWhenUnspecified = true;
+                /*With the AssumeDefaultVersionWhenUnspecified and DefaultApiVersion properties, we are accepting version 1.0 if a client doesn’t specify the version of the API*/
+                x.ReportApiVersions = true;
+                x.ApiVersionReader = new Microsoft.AspNetCore.Mvc.Versioning.HeaderApiVersionReader("x-frapper-api-version");
+            });
+            services.AddVersionedApiExplorer(
+                options =>
+                {
+                    // add the versioned api explorer, which also adds IApiVersionDescriptionProvider service
+                    // note: the specified format code will format the version as "'v'major[.minor][-status]"
+                    options.GroupNameFormat = "'v'VVV";
+                    // note: this option is only necessary when versioning by url segment. the SubstitutionFormat
+                    // can also be used to control the format of the API version in route templates
+                    options.SubstituteApiVersionInUrl = true;
+                });
+            /*api versioning-end*/
+
             #region swagger
-            services.AddSwaggerGen();
+            //services.AddSwaggerGen();
+            /*Register the Swagger generator-start*/
+            //services.AddSwaggerGen();
+            services.AddSwaggerGen(
+                (options) =>
+                {
+                    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "My API", Version = "v1" });
+                    options.SwaggerDoc("v2", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "My API", Version = "v2" });
+                }
+                );
+            /*Register the Swagger generator-end*/
             #endregion
 
 
@@ -67,11 +97,22 @@ namespace ApiCrudUsingGeneric
             }
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
+            /*app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "My API v2");
+
+                c.RoutePrefix = string.Empty;
+            });*/
+            /*specify the Swagger JSON endpoint-start*/
+            app.UseSwaggerUI(c =>
+            {
+                //c.DefaultModelsExpandDepth(-1);
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "My API v2");
                 c.RoutePrefix = string.Empty;
             });
+            /*specify the Swagger JSON endpoint-end*/
             app.UseHttpsRedirection();
 
             app.UseRouting();

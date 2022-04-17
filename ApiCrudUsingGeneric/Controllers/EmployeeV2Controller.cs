@@ -1,6 +1,5 @@
 ﻿using ApiCrudUsingGeneric.IService;
 using ApiCrudUsingGeneric.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using System;
@@ -10,19 +9,17 @@ using System.Threading.Tasks;
 
 namespace ApiCrudUsingGeneric.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
-    //[ControllerName("Employee")]
-    //[ApiVersion("1.0")]
-    [ApiVersion("1.0", Deprecated = true)]
-
-    public class EmployeeController : ControllerBase
+    [ApiVersion("2.0")]
+    [Route("api/Employee")]
+    [ControllerName("Employee")]
+    public class EmployeeV2Controller : Controller
     {
         private readonly IUnitOfWorkEntityFramework _unitOfWorkEntityFramework;
         private readonly IGenericQueries<Employee> _employeeQueries;
         private LinkGenerator _linkGenerator;
-
-        public EmployeeController(
+        public EmployeeV2Controller(
             IUnitOfWorkEntityFramework unitOfWorkEntityFramework
             , IGenericQueries<Employee> genericQueries
             , LinkGenerator linkGenerator
@@ -36,81 +33,48 @@ namespace ApiCrudUsingGeneric.Controllers
         [HttpPost]
         public IActionResult Post(Employee obj)
         {
-            #region objectIsNull-start
-            /*if (obj == null)
+            Employee emp = new Employee()
             {
-                var ownersWrapper0 = new LinkCollectionWrapper(obj);
+                Name = obj.Name,
+                Designation = obj.Designation,
+                Age = obj.Age
+            };
+            _unitOfWorkEntityFramework.EmployeesCommand.Add(emp);
+            /*object qq = default;
+            int i2 = (int)qq;*/
+            var result = _unitOfWorkEntityFramework.Commit();
+            #region resultIsSuccess-start
+            if (result)
+            {
+                var ownerLinks = CreateLinksForModel(emp.Id, null);
+                emp.Links = ownerLinks;
+                var ownersWrapper = new LinkCollectionWrapper(emp);
                 return Ok(new StatusResult<LinkCollectionWrapper>
                 {
-                    Result = CreateLinksForOwners(ownersWrapper0),
-                    Status = ResponseStatus.NULLPARAMETER,
-                    Message = "Parameter is null"
+                    Result = CreateLinksForController(ownersWrapper),
+                    Status = ResponseStatus.FETCHSUCCESS,
+                    Message = "Empoyee Created with specified Id"
                 });
-            }*/
-            #endregion objectIsNull-end
-            Employee emp = new Employee()
-                {
-                    Name = obj.Name,
-                    Designation = obj.Designation,
-                    Age = obj.Age
-                };
-             _unitOfWorkEntityFramework.EmployeesCommand.Add(emp);
-             /*object qq = default;
-             int i2 = (int)qq;*/
-             var result = _unitOfWorkEntityFramework.Commit();
-             #region resultIsSuccess-start
-             if (result)
-             {
-                 var ownerLinks = CreateLinksForModel(emp.Id, null);
-                 emp.Links = ownerLinks;
-                 var ownersWrapper = new LinkCollectionWrapper(emp);
-                 return Ok(new StatusResult<LinkCollectionWrapper>
-                 {
-                     Result = CreateLinksForController(ownersWrapper),
-                     Status = ResponseStatus.FETCHSUCCESS,
-                     Message = "Empoyee Created with specified Id"
-                 });
-             }
-             #endregion resultIsSuccess-end
+            }
+            #endregion resultIsSuccess-end
 
-             #region resultIsFalse-end
-             else
-             {
-                 var ownersWrapper2 = new LinkCollectionWrapper(obj);
-                 return Ok(new StatusResult<LinkCollectionWrapper>
-                 {
-                     Result = CreateLinksForController(ownersWrapper2),
-                     Status = ResponseStatus.COMMITERROR,
-                     Message = "Empoyee Creation Failed"
-                 });
-             }
-            #endregion resultIsFalse-end
-            #region defaultReturn
-            /*return BadRequest(new StatusResult<LinkCollectionWrapper>
+            #region resultIsFalse-end
+            else
+            {
+                var ownersWrapper2 = new LinkCollectionWrapper(obj);
+                return Ok(new StatusResult<LinkCollectionWrapper>
                 {
-                    Result = CreateLinksForOwners(new LinkCollectionWrapper(obj)),
-                    Status = ResponseStatus.FAILED,
+                    Result = CreateLinksForController(ownersWrapper2),
+                    Status = ResponseStatus.COMMITERROR,
                     Message = "Empoyee Creation Failed"
-                });*/
-            #endregion defaultReturn
+                });
+            }
+            #endregion resultIsFalse-end
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            #region parameterNull
-            /*if (id == null)
-            {
-                var ownersWrapper0 = new LinkCollectionWrapper(id);
-                return BadRequest(new StatusResult<LinkCollectionWrapper>
-                {
-                    Result = CreateLinksForController(ownersWrapper0),
-                    Status = ResponseStatus.NULLPARAMETER,
-                    Message = "Parameter is null"
-                });
-
-            }*/
-            #endregion parameterNull
             var movieTb = _employeeQueries.GetItembyId(id);
             #region noContent
             if (movieTb == null)
@@ -140,17 +104,6 @@ namespace ApiCrudUsingGeneric.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            /*if (id == null)
-            {
-                var ownersWrapper0 = new LinkCollectionWrapper(id);
-                return Ok(new StatusResult<LinkCollectionWrapper>
-                {
-                    Result = CreateLinksForController(ownersWrapper0),
-                    Status = ResponseStatus.BADREQUEST,
-                    Message = "Parameter is null"
-                });
-            }*/
-
             var emp = _employeeQueries.GetItembyId(id);
             if (emp == null)
             {
@@ -273,51 +226,6 @@ namespace ApiCrudUsingGeneric.Controllers
             });
         }
 
-        /*[HttpGet]
-        [Route("GetAllMovie")]
-        public IEnumerable<Movie> GetAllMovies([FromQuery] PagingParameter pagingParameter)
-        {
-            var source = _iMoviesQueries.GetMovies();
-            // Get's No of Rows Count   
-            int count = source.Count();
-
-            // Parameter is passed from Query string if it is null then it default Value will be pageNumber:1  
-            int currentPage = pagingParameter.PageNumber;
-
-            // Parameter is passed from Query string if it is null then it default Value will be pageSize:20  
-            int pageSize = pagingParameter.PageSize;
-
-            // Display TotalCount to Records to User  
-            int totalCount = count;
-
-            // Calculating Totalpage by Dividing (No of Records / Pagesize)  
-            int totalPages = (int)Math.Ceiling(count / (double)pageSize);
-
-            // Returns List of Customer after applying Paging   
-            var items = source.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
-
-            // if CurrentPage is greater than 1 means it has previousPage  
-            var previousPage = currentPage > 1 ? "Yes" : "No";
-
-            // if TotalPages is greater than CurrentPage means it has nextPage  
-            var nextPage = currentPage < totalPages ? "Yes" : "No";
-
-            // Object which we are going to send in header   
-            var paginationMetadata = new PaginationMetadata
-            {
-                TotalCount = totalCount,
-                PageSize = pageSize,
-                CurrentPage = currentPage,
-                TotalPages = totalPages,
-                PreviousPage = previousPage,
-                NextPage = nextPage
-            };
-
-            HttpContext.Response.Headers.Add("Paging-Headers", JsonConvert.SerializeObject(paginationMetadata));
-            // Returing List of Customers Collections  
-            return items;
-        }*/
-
 
         private IEnumerable<Link> CreateLinksForModel(int id, string fields = "")
         {
@@ -337,9 +245,6 @@ namespace ApiCrudUsingGeneric.Controllers
         }
         private LinkCollectionWrapper CreateLinksForController(LinkCollectionWrapper CollectionWrapper)
         {
-            /*CollectionWrapper.Links.Add(new Link(_linkGenerator.GetUriByAction(HttpContext, nameof(Get)),
-                    "GetEmployees",
-                    "GET"));*/
             CollectionWrapper.Links.Add(new Link("https://localhost:44391/api/Employee",
                     "GetEmployees",
                     "GET"));
