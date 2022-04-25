@@ -89,13 +89,13 @@ namespace ApiCrudUsingGeneric
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,ApplicationDbContext db)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            db.Database.EnsureCreated();
             app.UseSwagger();
             /*app.UseSwaggerUI(c =>
             {

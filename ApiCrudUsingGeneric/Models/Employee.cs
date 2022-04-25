@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 
 namespace ApiCrudUsingGeneric.Models
 {
+    [Table("Employees")]
     public class Employee
     {
+
+        [Key]
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
